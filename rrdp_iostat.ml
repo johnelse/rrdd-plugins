@@ -639,28 +639,6 @@ let gen_metrics () =
 	let vdi_to_vm = get_vdi_to_vm_map () in
 	D.debug "VDI-to-VM map: %s" (String.concat "; " (List.map (fun (vdi, (vm, pos)) -> Printf.sprintf "%s -> %s @ %s" vdi vm pos) vdi_to_vm));
 
-	(* Lookup the VM(s) for this VDI and associate with the RRD for those VM(s) *)
-	let data_sources_vm_iostats = List.flatten (
-		List.map (fun ((sr, vdi), iostats_value) ->
-			let create_metrics (vm, pos) =
-				let key_format key = Printf.sprintf "vbd_%s_%s" pos key in
-				let stats = Iostats_value.make_ds ~owner:(Rrd.VM vm) ~name:"VDI" ~key_format iostats_value in
-				(* Drop the latency metric -- this is already covered by vbd_DEV_{read,write}_latency provided by xcp-rrdd *)
-				List.tl stats in
-			let vms = list_all_assocs vdi vdi_to_vm in
-			List.map create_metrics vms
-		) sr_vdi_to_iostats_values) in
-	let data_sources_vm_stats = List.flatten (
-		List.map (fun ((sr, vdi), stats_value) ->
-			let create_metrics (vm, pos) =
-				let key_format key = Printf.sprintf "vbd_%s_%s" pos key in
-				let stats = Stats_value.make_ds ~owner:(Rrd.VM vm) ~name:"VDI" ~key_format stats_value in
-				(* Drop the io_throughput_* metrics -- the read and write ones are already covered by vbd_DEV_{read,write} provided by xcp-rrdd *)
-				List.rev_chop 3 stats |> snd in
-			let vms = list_all_assocs vdi vdi_to_vm in
-			List.map create_metrics vms
-		) sr_vdi_to_stats_values) in
-
 	(* convert recent stats data to hashtbl for next iterator use *)
 	let to_hashtbl sr_vdi_to_stats =
 		let hashtbl = Hashtbl.create 20 in
@@ -672,7 +650,7 @@ let gen_metrics () =
 	sr_vdi_to_last_iostats_values := Some (to_hashtbl sr_vdi_to_iostats);
 	sr_vdi_to_last_stats_values := Some (to_hashtbl sr_vdi_to_stats);
 
-	List.flatten (data_sources_stats @ data_sources_iostats @ data_sources_vm_stats @ data_sources_vm_iostats)
+	List.flatten (data_sources_stats @ data_sources_iostats)
 
 let _ =
 	initialise ();
