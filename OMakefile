@@ -57,6 +57,8 @@ OCamlProgram($(RRDP_IOSTAT), $(RRDP_IOSTAT_FILES))
 OCamlProgram($(RRDP_SQUEEZED), $(RRDP_SQUEEZED_FILES))
 OCamlProgram($(RRDP_XENPM), $(RRDP_XENPM_FILES))
 
+OCamlProgram(read_blktap_stats, read_blktap_stats blktap3_stats)
+
 .PHONY: install
 install: $(RRDP_IOSTAT) $(RRDP_XENPM) $(RRDP_SQUEEZED)
 	mkdir -p $(DESTDIR)$(LIBEXECDIR)/xcp-rrdd-plugins/

@@ -1,6 +1,7 @@
 TARGETS = rrdp_iostat \
 	 rrdp_squeezed \
-	 rrdp_xenpm
+	 rrdp_xenpm \
+	 read_blktap_stats
 
 .PHONY: build
 build: $(TARGETS)
